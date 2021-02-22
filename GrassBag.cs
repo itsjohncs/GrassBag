@@ -8,8 +8,24 @@ using UnityEngine.UI;
 
 namespace GrassBag
 {
+    public class GrassStat
+    {
+        public readonly int total;
+        public readonly int mowed;
+
+        public GrassStat(int total, int mowed)
+        {
+            this.total = total;
+            this.mowed = mowed;
+        }
+    }
+
     public class GrassRegistry : ModSettings
     {
+        // All stats tuples are: (total, mowed)
+        private GrassStat globalStats = new GrassStat(0, 0);
+        private Dictionary<string, GrassStat> statsByScene = new Dictionary<string, GrassStat>();
+
         private bool IsMowableGrass(GameObject gameObject)
         {
             return
@@ -22,42 +38,28 @@ namespace GrassBag
 
         private string GetKeyForGrass(string sceneName, GameObject gameObject)
         {
+            if (sceneName.Contains("/"))
+            {
+                throw new System.ArgumentException("sceneName cannot contain /");
+            }
+
             return sceneName + "/" + gameObject.name;
         }
 
-        public (int, int) GetGlobalGrassStats()
+        public GrassStat GetGlobalGrassStats()
         {
-            int total = BoolValues.Count;
-            int numMowed = 0;
-            foreach (bool mowed in BoolValues.Values)
-            {
-                if (mowed)
-                {
-                    numMowed += 1;
-                }
-            }
-
-            return (total, numMowed);
+            return globalStats;
         }
 
-        public (int, int) GetSceneGrassStats(string sceneName)
+        public GrassStat GetSceneGrassStats(string sceneName)
         {
-            int total = 0;
-            int numMowed = 0;
-            foreach (KeyValuePair<string, bool> kv in BoolValues)
+            if (statsByScene.TryGetValue(sceneName, out GrassStat stats))
             {
-                if (kv.Key.StartsWith(sceneName + "/"))
-                {
-                    total += 1;
-
-                    if (kv.Value)
-                    {
-                        numMowed += 1;
-                    }
-                }
+                return stats;
+            } else
+            {
+                return new GrassStat(0, 0);
             }
-
-            return (total, numMowed);
         }
 
         // Called for all game objects. If it's grass it'll be registered.
@@ -67,6 +69,18 @@ namespace GrassBag
             if (IsMowableGrass(gameObject) && !BoolValues.ContainsKey(key))
             {
                 BoolValues.Add(key, false);
+
+                globalStats = new GrassStat(globalStats.total + 1, globalStats.mowed);
+
+                if (statsByScene.TryGetValue(sceneName, out GrassStat sceneStats))
+                {
+                    statsByScene[sceneName] = new GrassStat(sceneStats.total + 1, sceneStats.mowed);
+                }
+                else
+                {
+                    statsByScene.Add(sceneName, new GrassStat(1, 0));
+                }
+
                 return true;
             }
 
@@ -80,6 +94,12 @@ namespace GrassBag
             if (BoolValues.ContainsKey(key) && !BoolValues[key])
             {
                 BoolValues[key] = true;
+
+                globalStats = new GrassStat(globalStats.total, globalStats.mowed + 1);
+
+                GrassStat sceneStats = statsByScene[sceneName];
+                statsByScene[sceneName] = new GrassStat(sceneStats.total, sceneStats.mowed + 1);
+
                 return true;
             }
 
@@ -92,13 +112,39 @@ namespace GrassBag
             return keys;
         }
 
-        public void Rehydrate(string[] keys)
+        public void Prepoluate(string[] keys)
         {
             foreach (string key in keys)
             {
                 if (!BoolValues.ContainsKey(key))
                 {
                     BoolValues.Add(key, false);
+                }
+            }
+
+            RecalculateStats();
+        }
+
+        public void RecalculateStats()
+        {
+            globalStats = new GrassStat(0, 0);
+            statsByScene = new Dictionary<string, GrassStat>();
+            foreach (KeyValuePair<string, bool> kv in BoolValues)
+            {
+                string[] parts = kv.Key.Split(new char[] { '/' }, 2);
+                string sceneName = parts[0];
+
+                bool isMowed = kv.Value;
+
+                globalStats = new GrassStat(globalStats.total + 1, globalStats.mowed + (isMowed ? 1 : 0));
+
+                if (statsByScene.TryGetValue(sceneName, out GrassStat sceneStats))
+                {
+                    statsByScene[sceneName] = new GrassStat(sceneStats.total + 1, sceneStats.mowed + (isMowed ? 1 : 0));
+                }
+                else
+                {
+                    statsByScene.Add(sceneName, new GrassStat(1, (isMowed ? 1 : 0)));
                 }
             }
         }
@@ -131,9 +177,15 @@ namespace GrassBag
             ModHooks.Instance.SlashHitHook += OnSlashHit;
             ModHooks.Instance.SavegameSaveHook += OnSave;
             ModHooks.Instance.NewGameHook += OnNewGame;
+            ModHooks.Instance.AfterSavegameLoadHook += OnSaveGameLoaded;
 
             ContractorManager.Instance.StartCoroutine(FindGrassForever());
             ContractorManager.Instance.StartCoroutine(UpdateGrassCountForever());
+        }
+
+        private void OnSaveGameLoaded(SaveGameData data)
+        {
+            KnownGrass.RecalculateStats();
         }
 
         private IEnumerator FindGrassForever()
@@ -192,9 +244,11 @@ namespace GrassBag
                 try
                 {
                     string sceneName = GameManager.instance.sceneName;
-                    (int globalTotal, int globalMowed) = KnownGrass.GetGlobalGrassStats();
-                    (int sceneTotal, int sceneMowed) = KnownGrass.GetSceneGrassStats(sceneName);
-                    status.text = string.Format("{0}/{1} globally -- {2}/{3} in room", globalMowed, globalTotal, sceneMowed, sceneTotal);
+                    GrassStat globalStats = KnownGrass.GetGlobalGrassStats();
+                    GrassStat sceneStats = KnownGrass.GetSceneGrassStats(sceneName);
+                    status.text = string.Format("{0}/{1} globally -- {2}/{3} in room",
+                                                globalStats.mowed, globalStats.total,
+                                                sceneStats.mowed, sceneStats.mowed);
                 }
                 catch (System.Exception e)
                 {
@@ -204,8 +258,6 @@ namespace GrassBag
 
                 yield return new WaitForSeconds(10);
             }
-
-            yield break;
         }
 
 
@@ -216,7 +268,7 @@ namespace GrassBag
 
         public void OnNewGame()
         {
-            KnownGrass.Rehydrate(System.IO.File.ReadAllLines(Application.persistentDataPath + ModHooks.PathSeperator + "AllGrass.txt"));
+            KnownGrass.Prepoluate(System.IO.File.ReadAllLines(Application.persistentDataPath + ModHooks.PathSeperator + "AllGrass.txt"));
         }
 
         public void OnSlashHit(Collider2D otherCollider, GameObject gameObject)
