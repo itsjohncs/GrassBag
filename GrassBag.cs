@@ -5,6 +5,7 @@ using UnityEngine;
 using ModCommon;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 namespace GrassBag
 {
@@ -178,10 +179,8 @@ namespace GrassBag
             ModHooks.Instance.SavegameSaveHook += OnSave;
             ModHooks.Instance.NewGameHook += OnNewGame;
             ModHooks.Instance.AfterSavegameLoadHook += OnSaveGameLoaded;
-
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
             InitializeStatusText();
-
-            ContractorManager.Instance.StartCoroutine(FindGrassForever());
         }
 
         private void OnSaveGameLoaded(SaveGameData data)
@@ -216,32 +215,38 @@ namespace GrassBag
             GrassStat sceneStats = KnownGrass.GetSceneGrassStats(sceneName);
             statusText.text = string.Format("{0}/{1} globally -- {2}/{3} in room",
                                             globalStats.mowed, globalStats.total,
-                                            sceneStats.mowed, sceneStats.mowed);
+                                            sceneStats.mowed, sceneStats.total);
         }
 
-        private IEnumerator FindGrassForever()
+        private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
         {
-            while (true)
-            {
-                try
-                {
-                    string sceneName = GameManager.instance.sceneName;
-                    foreach (GameObject gameObject in Object.FindObjectsOfType<GameObject>())
-                    {
-                        if (KnownGrass.MaybeRegisterGrass(sceneName, gameObject))
-                        {
-                            Log("Grass discovered " + sceneName + "/" + gameObject.name);
-                        }
-                    }
+            Log("Scene loaded");
+            ContractorManager.Instance.StartCoroutine(FindGrass());
+            UpdateStatusText();
+        }
 
-                    UpdateStatusText();
-                } catch (System.Exception e)
+        private IEnumerator FindGrass()
+        {
+            // The docs suggest waiting a frame... I can afford a particularly
+            // leisurely pace, so let's wait a whole second.
+            yield return new WaitForSeconds(1);
+
+            try
+            {
+                string sceneName = GameManager.instance.sceneName;
+                foreach (GameObject gameObject in Object.FindObjectsOfType<GameObject>())
                 {
-                    Log("Error occurred while finding grass");
-                    Log(e.ToString());
+                    if (KnownGrass.MaybeRegisterGrass(sceneName, gameObject))
+                    {
+                        Log("Grass discovered " + sceneName + "/" + gameObject.name);
+                    }
                 }
 
-                yield return new WaitForSeconds(10);
+                UpdateStatusText();
+            } catch (System.Exception e)
+            {
+                Log("Error occurred while finding grass");
+                Log(e.ToString());
             }
         }
 
