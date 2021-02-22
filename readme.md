@@ -18,7 +18,7 @@ Then when you create a new game, your new save's "global total" will be seeded w
 
 First install the Modding API and the ModCommon mod. You can install both of these with the Hollow Knight Mod Installer.
 
-Then grab the latest release from https://github.com/itsjohncs/GrassBag (it'll be a zip file) then copy the GrassBag.dll file inside it into your Mods/ directory with your other mods (ex: on my computer the directory is at C:\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\Mods).
+Then grab the latest release from https://github.com/itsjohncs/GrassBag/releases (it'll be a zip file) then copy the GrassBag.dll file inside it into your Mods/ directory with your other mods (ex: on my computer the directory is at C:\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\Mods).
 
 You're done! Enjoy being the lawnmower you always wanted to be.
 

@@ -220,7 +220,6 @@ namespace GrassBag
 
         private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
         {
-            Log("Scene loaded");
             ContractorManager.Instance.StartCoroutine(FindGrass());
             UpdateStatusText();
         }
