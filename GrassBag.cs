@@ -8,16 +8,8 @@ using UnityEngine.UI;
 
 namespace GrassBag
 {
-    public class SaveModSettings : ModSettings
-    {
-        public bool HasUnlockedEpicGamerBoss;
-        public int NumberOfTimesDiedToEpicBoss;
-    }
-
     public class GrassRegistry : ModSettings
     {
-        //public SerializableBoolDictionary AllGrass = new SerializableBoolDictionary();
-
         private bool IsMowableGrass(GameObject gameObject)
         {
             return
@@ -112,16 +104,8 @@ namespace GrassBag
         }
     }
 
-
-    /// <summary>
-    /// The main mod class
-    /// </summary>
-    /// <remarks>This configuration has settings that are save specific</remarks>
     public class GrassBag : Mod
     {
-        /// <summary>
-        /// Represents this Mod's instance.
-        /// </summary>
         internal static GrassBag Instance;
 
         public GrassRegistry KnownGrass = new GrassRegistry();
@@ -235,14 +219,6 @@ namespace GrassBag
             KnownGrass.Rehydrate(System.IO.File.ReadAllLines(Application.persistentDataPath + ModHooks.PathSeperator + "AllGrass.txt"));
         }
 
-
-        /// <summary>
-        /// Calculates Crits on attack
-        /// </summary>
-        /// <remarks>
-        /// This checks if this is our 4th attack or not.  If it is, we're going to critical hit by doubling our nail damage for the attack.  We also store the previous nail damage so that we can revert it back after the attack is over.
-        /// </remarks>
-        /// <param name="dir"></param>
         public void OnSlashHit(Collider2D otherCollider, GameObject gameObject)
         {
             if (KnownGrass.MaybeRegisterMow(GameManager.instance.sceneName, otherCollider.gameObject))
