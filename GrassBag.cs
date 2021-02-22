@@ -179,13 +179,44 @@ namespace GrassBag
             ModHooks.Instance.NewGameHook += OnNewGame;
             ModHooks.Instance.AfterSavegameLoadHook += OnSaveGameLoaded;
 
+            InitializeStatusText();
+
             ContractorManager.Instance.StartCoroutine(FindGrassForever());
-            ContractorManager.Instance.StartCoroutine(UpdateGrassCountForever());
         }
 
         private void OnSaveGameLoaded(SaveGameData data)
         {
             KnownGrass.RecalculateStats();
+            UpdateStatusText();
+        }
+
+        private Text statusText;
+        void InitializeStatusText()
+        {
+            CanvasUtil.CreateFonts();
+
+            GameObject canvas = CanvasUtil.CreateCanvas(RenderMode.ScreenSpaceOverlay, new Vector2(1920, 1080));
+            canvas.GetComponent<Canvas>().sortingOrder = 1;
+
+            Object.DontDestroyOnLoad(canvas);
+
+            statusText = CanvasUtil.CreateTextPanel(
+                canvas,
+                "",
+                21,
+                TextAnchor.MiddleRight,
+                new CanvasUtil.RectData(new Vector2(600, 50), new Vector2(600, 1040), new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0.5f, 0.5f)),
+                true).GetComponent<Text>();
+        }
+
+        void UpdateStatusText()
+        {
+            string sceneName = GameManager.instance.sceneName;
+            GrassStat globalStats = KnownGrass.GetGlobalGrassStats();
+            GrassStat sceneStats = KnownGrass.GetSceneGrassStats(sceneName);
+            statusText.text = string.Format("{0}/{1} globally -- {2}/{3} in room",
+                                            globalStats.mowed, globalStats.total,
+                                            sceneStats.mowed, sceneStats.mowed);
         }
 
         private IEnumerator FindGrassForever()
@@ -202,6 +233,8 @@ namespace GrassBag
                             Log("Grass discovered " + sceneName + "/" + gameObject.name);
                         }
                     }
+
+                    UpdateStatusText();
                 } catch (System.Exception e)
                 {
                     Log("Error occurred while finding grass");
@@ -212,55 +245,6 @@ namespace GrassBag
             }
         }
 
-        private IEnumerator UpdateGrassCountForever()
-        {
-            Text status;
-            try
-            {
-                CanvasUtil.CreateFonts();
-
-                GameObject canvas = CanvasUtil.CreateCanvas(RenderMode.ScreenSpaceOverlay, new Vector2(1920, 1080));
-                canvas.GetComponent<Canvas>().sortingOrder = 1;
-
-                Object.DontDestroyOnLoad(canvas);
-
-                status = CanvasUtil.CreateTextPanel(
-                    canvas,
-                    "",
-                    21,
-                    TextAnchor.MiddleRight,
-                    new CanvasUtil.RectData(new Vector2(600, 50), new Vector2(600, 1040), new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0.5f, 0.5f)),
-                    true).GetComponent<Text>();
-            }
-            catch (System.Exception e)
-            {
-                Log("Error occurred while preparing grass status overlay... stopping");
-                Log(e.ToString());
-                yield break;
-            }
-
-            while (true)
-            {
-                try
-                {
-                    string sceneName = GameManager.instance.sceneName;
-                    GrassStat globalStats = KnownGrass.GetGlobalGrassStats();
-                    GrassStat sceneStats = KnownGrass.GetSceneGrassStats(sceneName);
-                    status.text = string.Format("{0}/{1} globally -- {2}/{3} in room",
-                                                globalStats.mowed, globalStats.total,
-                                                sceneStats.mowed, sceneStats.mowed);
-                }
-                catch (System.Exception e)
-                {
-                    Log("Error occurred while updating grass status overlay.");
-                    Log(e.ToString());
-                }
-
-                yield return new WaitForSeconds(10);
-            }
-        }
-
-
         public void OnSave(int id)
         {
             System.IO.File.WriteAllLines(Application.persistentDataPath + ModHooks.PathSeperator + "AllGrass.txt", KnownGrass.GetKeys());
@@ -269,6 +253,7 @@ namespace GrassBag
         public void OnNewGame()
         {
             KnownGrass.Prepoluate(System.IO.File.ReadAllLines(Application.persistentDataPath + ModHooks.PathSeperator + "AllGrass.txt"));
+            UpdateStatusText();
         }
 
         public void OnSlashHit(Collider2D otherCollider, GameObject gameObject)
@@ -276,6 +261,7 @@ namespace GrassBag
             if (KnownGrass.MaybeRegisterMow(GameManager.instance.sceneName, otherCollider.gameObject))
             {
                 Log("Grass mowed " + GameManager.instance.sceneName + "/" + otherCollider.gameObject.name);
+                UpdateStatusText();
             }
         }
     }
