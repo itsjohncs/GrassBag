@@ -44,7 +44,11 @@ namespace GrassBag
                 throw new System.ArgumentException("sceneName cannot contain /");
             }
 
-            return sceneName + "/" + gameObject.name;
+            return sceneName + "/" + gameObject.name +
+                   "(" +
+                        gameObject.transform.position.x + "," +
+                        gameObject.transform.position.y +
+                   ")";
         }
 
         public GrassStat GetGlobalGrassStats()
@@ -82,6 +86,8 @@ namespace GrassBag
                     statsByScene.Add(sceneName, new GrassStat(1, 0));
                 }
 
+                Modding.Logger.Log("Discovered " + key);
+
                 return true;
             }
 
@@ -100,6 +106,8 @@ namespace GrassBag
 
                 GrassStat sceneStats = statsByScene[sceneName];
                 statsByScene[sceneName] = new GrassStat(sceneStats.total, sceneStats.mowed + 1);
+
+                Modding.Logger.Log("Mowed " + key);
 
                 return true;
             }
@@ -235,10 +243,7 @@ namespace GrassBag
                 string sceneName = GameManager.instance.sceneName;
                 foreach (GameObject gameObject in Object.FindObjectsOfType<GameObject>())
                 {
-                    if (KnownGrass.MaybeRegisterGrass(sceneName, gameObject))
-                    {
-                        Log("Grass discovered " + sceneName + "/" + gameObject.name);
-                    }
+                    KnownGrass.MaybeRegisterGrass(sceneName, gameObject);
                 }
 
                 UpdateStatusText();
@@ -264,7 +269,6 @@ namespace GrassBag
         {
             if (KnownGrass.MaybeRegisterMow(GameManager.instance.sceneName, otherCollider.gameObject))
             {
-                Log("Grass mowed " + GameManager.instance.sceneName + "/" + otherCollider.gameObject.name);
                 UpdateStatusText();
             }
         }
