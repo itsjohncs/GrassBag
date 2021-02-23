@@ -171,11 +171,7 @@ namespace GrassBag
             set => KnownGrass = (GrassRegistry)value;
         }
 
-        /// <summary>
-        /// Fetches the Mod Version From AssemblyInfo.AssemblyVersion
-        /// </summary>
-        /// <returns>Mod's Version</returns>
-        public override string GetVersion() => Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        public override string GetVersion() => "1.4.1";
         
         /// <summary>
         /// Called after the class has been constructed.
