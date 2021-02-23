@@ -186,6 +186,7 @@ namespace GrassBag
             ModHooks.Instance.SavegameSaveHook += OnSave;
             ModHooks.Instance.NewGameHook += OnNewGame;
             ModHooks.Instance.AfterSavegameLoadHook += OnSaveGameLoaded;
+            ModHooks.Instance.HeroUpdateHook += OnHeroUpdate;
 
             // The actual GrassCut object isn't instantiated reliably, but
             // ShouldCut seems to always be called reliably and when it returns
@@ -195,6 +196,9 @@ namespace GrassBag
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
 
             InitializeStatusText();
+            InitializeGrassCompass();
+
+            ContractorManager.Instance.StartCoroutine(FindNearestGrassForever());
         }
 
         private Collider2D[] otherColliders = new Collider2D[30];
@@ -246,7 +250,7 @@ namespace GrassBag
             canvas.GetComponent<Canvas>().sortingOrder = 1;
 
             Object.DontDestroyOnLoad(canvas);
-
+            
             statusText = CanvasUtil.CreateTextPanel(
                 canvas,
                 "",
@@ -254,6 +258,124 @@ namespace GrassBag
                 TextAnchor.MiddleRight,
                 new CanvasUtil.RectData(new Vector2(600, 50), new Vector2(600, 1040), new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0.5f, 0.5f)),
                 true).GetComponent<Text>();
+        }
+
+        GameObject compass = null;
+        CanvasGroup compassCanvasGroup = null;
+        void InitializeGrassCompass()
+        {
+            GameObject canvas = CanvasUtil.CreateCanvas(RenderMode.WorldSpace, new Vector2(1, 1));
+            compassCanvasGroup = canvas.GetComponent<CanvasGroup>();
+            canvas.GetComponent<Canvas>().sortingOrder = 1;
+            Object.DontDestroyOnLoad(canvas);
+
+            Texture2D tex = new Texture2D(1, 1);
+            tex.SetPixel(0, 0, Color.green);
+            tex.Apply();
+            Sprite sprite = Sprite.Create(tex, new Rect(0, 0, 1, 1), Vector2.zero);
+
+            compass = CanvasUtil.CreateImagePanel(canvas, sprite, new CanvasUtil.RectData(new Vector2(0.1f, 0.1f), new Vector2(0, 0)));
+
+            compassCanvasGroup.alpha = 0;
+        }
+
+        private IEnumerator FindNearestGrassForever()
+        {
+            while (true)
+            {
+                try
+                {
+                    FindNearestGrass();
+                }
+                catch (System.Exception e)
+                {
+                    Log("Error occurred while finding nearest grass");
+                    Log(e.ToString());
+                }
+
+                yield return new WaitForSeconds(1);
+            }
+        }
+
+
+        Vector2? closestGrass = null;
+
+        private void FindNearestGrass()
+        {
+            string currentScene = GameManager.instance.sceneName;
+            if (currentScene == null)
+            {
+                return;
+            }
+
+            if (GameManager.instance == null || GameManager.instance.hero_ctrl == null || GameManager.instance.hero_ctrl.gameObject == null)
+            {
+                return;
+            }
+            Vector3 heroPosition3D = GameManager.instance.hero_ctrl.gameObject.transform.position;
+            Vector2 heroPosition = new Vector2(heroPosition3D.x, heroPosition3D.y);
+
+            // This was added quite late... and we are _not_ well equipped to
+            // do it. So we'll do it in a probably-quite-slow manner but just
+            // do it sparingly.
+            Vector2 closestGrassPosition = Vector2.zero;
+            float closestDistance = float.PositiveInfinity;
+            foreach (KeyValuePair<string, bool> kv in KnownGrass.BoolValues)
+            {
+                if (kv.Value)
+                {
+                    continue;
+                }
+
+                string[] parts = kv.Key.Split(new char[] { '/' }, 2);
+
+                string sceneName = parts[0];
+                if (sceneName != currentScene)
+                {
+                    continue;
+                }
+
+                string[] xy = parts[1].Substring(parts[1].LastIndexOf('(') + 1).TrimEnd(new char[] { ')' }).Split(new char[] { ',' });
+                Vector2 position = new Vector2(float.Parse(xy[0]), float.Parse(xy[1]));
+
+                float distance = Vector2.Distance(heroPosition, position);
+                if (distance < closestDistance)
+                {
+                    closestGrassPosition = position;
+                    closestDistance = distance;
+                }
+            }
+
+            if (closestDistance != float.PositiveInfinity)
+            {
+                closestGrass = closestGrassPosition;
+            } else
+            {
+                closestGrass = null;
+            }
+        }
+
+        private void OnHeroUpdate()
+        {
+            if (compass != null && GameManager.instance != null && GameManager.instance.hero_ctrl != null && GameManager.instance.hero_ctrl.gameObject != null)
+            {
+                if (closestGrass.HasValue)
+                {
+                    Vector3 heroPosition3D = GameManager.instance.hero_ctrl.gameObject.transform.position;
+                    Vector2 heroPosition = new Vector2(heroPosition3D.x, heroPosition3D.y);
+
+                    Vector2 normalizedDirection = closestGrass.Value - heroPosition;
+                    normalizedDirection.Normalize();
+                    Vector3 normalizedDirection3D = new Vector3(normalizedDirection.x, normalizedDirection.y, 0);
+
+                    compass.transform.position = GameManager.instance.hero_ctrl.gameObject.transform.position + normalizedDirection3D * 1.5f;
+
+                    compassCanvasGroup.alpha = 1;
+                } else
+                {
+                    compassCanvasGroup.alpha = 0;
+                }
+            }
         }
 
         void UpdateStatusText()
