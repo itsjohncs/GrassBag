@@ -197,23 +197,36 @@ namespace GrassBag
             InitializeStatusText();
         }
 
+        private Collider2D[] otherColliders = new Collider2D[30];
+
         private bool OnShouldCut(On.GrassCut.orig_ShouldCut orig, Collider2D collision)
         {
-            if (orig(collision))
+            try
             {
-                Collider2D[] otherColliders = new Collider2D[2];
-                collision.GetContacts(otherColliders);
-                foreach (Collider2D other in otherColliders)
+                if (orig(collision))
                 {
-                    if (KnownGrass.MaybeRegisterMow(GameManager.instance.sceneName, other.gameObject))
+                    int numFound = collision.GetContacts(otherColliders);
+                    for (int i = 0; i < numFound && i < otherColliders.Length; ++i)
                     {
-                        UpdateStatusText();
+                        Collider2D other = otherColliders[i];
+                        if (other != null && KnownGrass.MaybeRegisterMow(GameManager.instance.sceneName, other.gameObject))
+                        {
+                            UpdateStatusText();
+                        }
                     }
-                }
 
-                return true;
-            } else
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (System.Exception e)
             {
+                Log("Error occurred in should cut grass");
+                Log(e.ToString());
+
                 return false;
             }
         }
