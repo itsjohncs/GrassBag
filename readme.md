@@ -14,6 +14,10 @@ Note that you only get credit for mowing a piece of grass once. You can't mow it
 
 You'll also see a small green box that hovers around your knight. It will always point at the nearest grass that you haven't mowed yet (unless you've mowed all the grass in the room you're in of course!).
 
+## Uncuttable Grass
+
+Some of the grass in the game (especially in White Palace) seems to be bugged. You can only cut it _sometimes_. If you encounter such a tricky grass, just strike it with your nail (rather than c-dash or any other mowing method). It won't be cut in-game, but GrassBag will count it as mowed: it knows you tried your best.
+
 ## AllGrass.txt: Seeding the Global Total
 
 The "global" total only increases when you enter a room with grass in it. The mod isn't aware of all the grass in the game right off the bat. But it can be!
