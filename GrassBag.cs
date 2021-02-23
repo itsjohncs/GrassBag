@@ -6,6 +6,7 @@ using ModCommon;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using HutongGames.PlayMaker;
 
 namespace GrassBag
 {
@@ -188,6 +189,13 @@ namespace GrassBag
             ModHooks.Instance.AfterSavegameLoadHook += OnSaveGameLoaded;
             ModHooks.Instance.HeroUpdateHook += OnHeroUpdate;
 
+            // Some grass can only sometimes be cut... it's quite confusing and
+            // I can't figure it out. So not only do we tap into ShouldCut
+            // below which'll get us all the cuttable grass, we also make sure
+            // that if our nail hit intersects with one of these "uncuttables"
+            // we'll still count it as a mow.
+            ModHooks.Instance.SlashHitHook += OnSlashHit;
+
             // The actual GrassCut object isn't instantiated reliably, but
             // ShouldCut seems to always be called reliably and when it returns
             // true, some grass is getting cut.
@@ -199,6 +207,14 @@ namespace GrassBag
             InitializeGrassCompass();
 
             ContractorManager.Instance.StartCoroutine(FindNearestGrassForever());
+        }
+
+        private void OnSlashHit(Collider2D otherCollider, GameObject gameObject)
+        {
+            if (KnownGrass.MaybeRegisterMow(GameManager.instance.sceneName, otherCollider.gameObject))
+            {
+                UpdateStatusText();
+            }
         }
 
         private Collider2D[] otherColliders = new Collider2D[30];
