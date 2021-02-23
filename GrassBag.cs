@@ -183,12 +183,39 @@ namespace GrassBag
         {
             Instance = this;
             
-            ModHooks.Instance.SlashHitHook += OnSlashHit;
             ModHooks.Instance.SavegameSaveHook += OnSave;
             ModHooks.Instance.NewGameHook += OnNewGame;
             ModHooks.Instance.AfterSavegameLoadHook += OnSaveGameLoaded;
+
+            // The actual GrassCut object isn't instantiated reliably, but
+            // ShouldCut seems to always be called reliably and when it returns
+            // true, some grass is getting cut.
+            On.GrassCut.ShouldCut += OnShouldCut;
+
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+
             InitializeStatusText();
+        }
+
+        private bool OnShouldCut(On.GrassCut.orig_ShouldCut orig, Collider2D collision)
+        {
+            if (orig(collision))
+            {
+                Collider2D[] otherColliders = new Collider2D[2];
+                collision.GetContacts(otherColliders);
+                foreach (Collider2D other in otherColliders)
+                {
+                    if (KnownGrass.MaybeRegisterMow(GameManager.instance.sceneName, other.gameObject))
+                    {
+                        UpdateStatusText();
+                    }
+                }
+
+                return true;
+            } else
+            {
+                return false;
+            }
         }
 
         private void OnSaveGameLoaded(SaveGameData data)
@@ -263,14 +290,6 @@ namespace GrassBag
         {
             KnownGrass.Prepoluate(System.IO.File.ReadAllLines(Application.persistentDataPath + ModHooks.PathSeperator + "AllGrass.txt"));
             UpdateStatusText();
-        }
-
-        public void OnSlashHit(Collider2D otherCollider, GameObject gameObject)
-        {
-            if (KnownGrass.MaybeRegisterMow(GameManager.instance.sceneName, otherCollider.gameObject))
-            {
-                UpdateStatusText();
-            }
         }
     }
 
