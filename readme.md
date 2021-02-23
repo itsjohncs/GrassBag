@@ -10,6 +10,10 @@ For example, you might see: **32/88 globally -- 11/13 in room**. In this example
 
 Note that you only get credit for mowing a piece of grass once. You can't mow it, let it regrow, and then come back and mow it again for more points. You gotta find greener pastures.
 
+## Grassward Compass
+
+You'll also see a small green box that hovers around your knight. It will always point at the nearest grass that you haven't mowed yet (unless you've mowed all the grass in the room you're in of course!).
+
 ## AllGrass.txt: Seeding the Global Total
 
 The "global" total only increases when you enter a room with grass in it. The mod isn't aware of all the grass in the game right off the bat. But it can be!
