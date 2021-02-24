@@ -1,6 +1,8 @@
 # GrassBag
 
-GrassBag is a Hollow Knight mod that adds a status bar to the top right of your screen to shows you how much grass you've mowed. Team Cherry have confirmed that mowing all the grass in Hollow Knight is the only way to get the true ending in Silksong, so get mowing!
+GrassBag is a Hollow Knight mod shows you how much grass you've mowed and leads you to more grass to mow.
+
+Team Cherry has confirmed that mowing all the grass in Hollow Knight is the only way to get the true ending in Silksong, so get mowing!
 
 ## Status Text
 
