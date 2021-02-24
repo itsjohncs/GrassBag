@@ -28,6 +28,19 @@ namespace GrassBag
         private GrassStat globalStats = new GrassStat(0, 0);
         private Dictionary<string, GrassStat> statsByScene = new Dictionary<string, GrassStat>();
 
+        private bool HasGrassyComponent(GameObject gameObject)
+        {
+            foreach (Component component in gameObject.GetComponents<Component>())
+            {
+                if (component.GetType().Name.ToLower().Contains("grass"))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private bool IsMowableGrass(GameObject gameObject)
         {
             return
@@ -35,7 +48,8 @@ namespace GrassBag
                 gameObject.name.ToLower().Contains("grass") &&
                 // Lots of grass isn't hittable, so we need to check if there's
                 // any colliders created for this.
-                gameObject.GetComponentsInChildren<Collider2D>().Length > 0;
+                gameObject.GetComponentsInChildren<Collider2D>().Length > 0 &&
+                HasGrassyComponent(gameObject);
         }
 
         private string GetKeyForGrass(string sceneName, GameObject gameObject)
@@ -171,7 +185,7 @@ namespace GrassBag
             set => KnownGrass = (GrassRegistry)value;
         }
 
-        public override string GetVersion() => "1.4.1";
+        public override string GetVersion() => "1.4.2";
         
         /// <summary>
         /// Called after the class has been constructed.
@@ -355,6 +369,7 @@ namespace GrassBag
                 {
                     closestGrassPosition = position;
                     closestDistance = distance;
+                    closestName = kv.Key;
                 }
             }
 
