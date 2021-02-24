@@ -369,7 +369,6 @@ namespace GrassBag
                 {
                     closestGrassPosition = position;
                     closestDistance = distance;
-                    closestName = kv.Key;
                 }
             }
 
