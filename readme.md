@@ -1,8 +1,8 @@
 # GrassBag
 
-GrassBag is a Hollow Knight mod shows you how much grass you've mowed and leads you to more grass to mow.
+GrassBag is a Hollow Knight mod that tracks how much grass you've mowed and leads you to more grass to mow.
 
-Team Cherry has confirmed that mowing all the grass in Hollow Knight is the only way to get the true ending in Silksong, so get mowing!
+Note: Team Cherry has confirmed that mowing all the grass in Hollow Knight is the only way to get the true ending in Silksong.
 
 ## Status Text
 
@@ -12,13 +12,19 @@ For example, you might see: **32/88 globally -- 11/13 in room**. In this example
 
 Note that you only get credit for mowing a piece of grass once. You can't mow it, let it regrow, and then come back and mow it again for more points. You gotta find greener pastures.
 
+![](status.png)
+
 ## Grassward Compass
 
-You'll also see a small green box that hovers around your knight. It will always point at the nearest grass that you haven't mowed yet (unless you've mowed all the grass in the room you're in of course!).
+You'll also see a small green dot that hovers around your knight. It will always point at the nearest grass that you haven't mowed yet (unless you've mowed all the grass in the room you're in of course!).
+
+![](grassward-compass.png)
 
 ## Uncuttable Grass
 
-Some of the grass in the game (especially in White Palace) seems to be bugged. You can only cut it _sometimes_. If you encounter such a tricky grass, just strike it with your nail (rather than c-dash or any other mowing method). It won't be cut in-game, but GrassBag will count it as mowed: it knows you tried your best.
+Some of the grass in the game cannot be cut (or at least, cannot be cut reliably) because it's meant to be far into the foreground or background. White palace and kingdoms edge has a fair amount of these uncuttable grasses for example.
+
+As an escape-hatch of sorts the mod will mark any grass that you slash with your nail as "mowed", even if it doesn't actually get cut. So remember to use your nail for any stubborn grass you come across, c-dash won't cut it!'
 
 ## AllGrass.txt: Seeding the Global Total
 
@@ -30,14 +36,11 @@ When you create a new game, the mod will check this file and seed the "global" t
 
 ## Installing
 
-First install the Modding API and the ModCommon mod. You can install both of these with the Hollow Knight Mod Installer.
-
-Then grab the latest release of GrassBag from https://github.com/itsjohncs/GrassBag/releases (it'll be a zip file with this README in it as well as a `GrassBag.dll` file). Copy the `GrassBag.dll` file inside it into your `Mods/` directory with your other mods (ex: on my computer the directory is at `C:\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\Mods`).
-
-You've installed GrassBag! Enjoy being the lawnmower you always wanted to be.
+1. Install the Modding API and the ModCommon mod. You can install both of these with the [Hollow Knight Mod Installer](https://www.nexusmods.com/hollowknight/mods/9).
+2. Grab the latest release of GrassBag from https://github.com/itsjohncs/GrassBag/releases (it'll be a zip file with a copy of this readme in it as well as a `GrassBag.dll` file).
+3. Copy that `GrassBag.dll` file that's inside that zip file it into your `Mods/` directory alongside your other mods (ex: on my computer the directory is at `C:\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\Mods`).
+4. You're done! When you load up Hollow Knight you should see **GrassBag** followed by some numbers on the top left of your screen. Enjoy being the lawnmower you always wanted to be.
 
 ## Issues
 
-If you find problems, open up an issue in https://github.com/itsjohncs/GrassBag/issues or reach out to me on Discord.
-
-Note: I've only created releases for Windows. I could make them for Mac as well. Open an issue in the GitHub repo if you're interested in that: https://github.com/itsjohncs/GrassBag.
+If you find problems, open up an issue in https://github.com/itsjohncs/GrassBag/issues or reach out to me on Discord (johncs#8921).
