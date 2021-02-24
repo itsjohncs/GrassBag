@@ -40,7 +40,7 @@ When you create a new game, the mod will check this file and seed the "global" t
 
 1. Install the Modding API and the ModCommon mod. You can install both of these with the [Hollow Knight Mod Installer](https://www.nexusmods.com/hollowknight/mods/9).
 2. Grab the latest release of GrassBag from https://github.com/itsjohncs/GrassBag/releases (it'll be a zip file with a copy of this readme in it as well as a `GrassBag.dll` file).
-3. Copy that `GrassBag.dll` file that's inside that zip file it into your `Mods/` directory alongside your other mods (ex: on my computer the directory is at `C:\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\Mods`).
+3. Copy that `GrassBag.dll` file that's inside that zip file it into your `Mods\` directory alongside your other mods (ex: on my computer the directory is at `C:\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\Mods`).
 4. You're done! When you load up Hollow Knight you should see **GrassBag** followed by some numbers on the top left of your screen. Enjoy being the lawnmower you always wanted to be.
 
 ## Issues
