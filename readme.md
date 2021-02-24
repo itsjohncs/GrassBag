@@ -22,9 +22,11 @@ You'll also see a small green dot that hovers around your knight. It will always
 
 ## Uncuttable Grass
 
-Some of the grass in the game cannot be cut (or at least, cannot be cut reliably) because it's meant to be far into the foreground or background. White palace and kingdoms edge has a fair amount of these uncuttable grasses for example.
+Some of the grass in the game cannot be cut (or at least, cannot be cut reliably) because it's meant to be far into the foreground or background. The mod is able to ignore most of the foreground/background grass automatically but some grass is very sneaky.
 
-As an escape-hatch of sorts the mod will mark any grass that you slash with your nail as "mowed", even if it doesn't actually get cut. So remember to use your nail for any stubborn grass you come across, c-dash won't cut it!'
+As an escape-hatch of sorts the mod will mark any grass that you slash with your nail as "mowed", even if it doesn't actually get cut. So remember to use your nail for any stubborn grass you come across, c-dash won't always cut it for this sneaky grass!
+
+Another modder is working on a grass tracking mod that uses a built-in list of all the cuttable grass, so this won't be an issue once they've finished that.
 
 ## AllGrass.txt: Seeding the Global Total
 
