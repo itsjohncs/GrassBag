@@ -1,5 +1,7 @@
 # GrassBag
 
+**This mod has been rewritten and has a new name, see: [Grassy Knight](https://github.com/itsjohncs/GrassyKnight)**
+
 GrassBag is a Hollow Knight mod that tracks how much grass you've mowed and leads you to more grass to mow.
 
 Note: Team Cherry has confirmed that mowing all the grass in Hollow Knight is the only way to get the true ending in Silksong.
